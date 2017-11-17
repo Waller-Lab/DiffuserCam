@@ -1,6 +1,6 @@
-impulse_mat_file_name = '~/Documents/foo';
-impulse_var_name = 'bar';
-image_file = 'cameraman.tif';  %This will have image_bias subtracted, and be resized to the downsampled impulse stack size using a 'box' filter
+impulse_mat_file_name = '~/Documents/randn_psf.mat';
+impulse_var_name = 'h';
+image_file = '~/Documents/test_diffusercam.png';  %This will have image_bias subtracted, and be resized to the downsampled impulse stack size using a 'box' filter
 color_to_process = 'red';  %'red','green','blue', or 'mono'. If raw file is mono, this is ignored
 image_bias = 100;   %If camera has bias, subtract from measurement file. 
 lateral_downsample = 2;  %factor to downsample impulse stack laterally. >1. Must be multiple of 2.

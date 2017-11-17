@@ -7,7 +7,7 @@ function [xhat, f] = DiffuserCam_main(config)
 
 
 % Read in settings
-eval(config) %This should be a string path to a .m script that populates a bunch of variables in your workspace
+run(config); %This should be a string path to a .m script that populates a bunch of variables in your workspace
 
 %Setup output folder
 if solverSettings.save_dir(end) == '/'
@@ -38,7 +38,7 @@ psf = psf_in.(impulse_var_name);
 % Get impulse dimensions
 [~,~, Nz_in] = size(psf);
 
-if end_z == 0
+if end_z == 0 || end_z > Nz_in;
     end_z = Nz_in;
 end
 
@@ -81,10 +81,10 @@ b = imresize(imc - image_bias,[Ny, Nx],'box');
 
 
 out_file = [solverSettings.save_dir,'/state_',num2str(solverSettings.maxIter)];
-if exist(out_file,'file')
+if exist([out_file,'.mat'],'file')
     fprintf('file already exists. Adding datetime stamp to avoid overwriting. \n');
     dtstamp = datestr(datetime('now'),'YYYYMMDD_hhmmss');
-    out_file = [out_file,'_dtstamp'];
+    out_file = [out_file,'_',dtstamp];
 end
 xhat = [];
 f = [];
