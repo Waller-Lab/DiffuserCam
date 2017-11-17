@@ -1,4 +1,4 @@
-function [sk, f] = ADMM3D_solver(psf,b,solverSettings)
+function [vk, f] = ADMM3D_solver(psf,b,solverSettings)
 % ADMM solver to compute 3D diffusercam images
 % H: Impulse stack 3D array
 % b: measurement image from camera
@@ -38,12 +38,12 @@ mu3 = solverSettings.mu3;
 [Ny, Nx, Nz] = size(psf);   %Get problem size
 
 
-sk = zeros(Ny*2,Nx*2,Nz);   %Initialize variables. sk is the primal (this is the image you want to find)
+vk = zeros(Ny*2,Nx*2,Nz);   %Initialize variables. vk is the primal (this is the image you want to find)
 xi = zeros(2*Ny,2*Nx,Nz);  % Dual associated with Mv = nu (boundary condition variables)
 rho = zeros(2*Ny,2*Nx,Nz);  % Dual associated with v = w   (nonnegativity)
 Dtb = pad3d(b);
 
-switch lower(sparsity_type)
+switch lower(solverSettings.regularizer)
     case('tv')
         lapl = zeros(2*Ny,2*Nx,Nz);    %Compute laplacian in closed form. This is the kernal to compute Psi'Psi
         lapl(1) = 6;
@@ -60,28 +60,36 @@ switch lower(sparsity_type)
         Ltv3 = @(P1,P2,P3)cat(1,P1(1,:,:),diff(P1,1,1),-P1(end,:,:)) + ...
             cat(2,P2(:,1,:),diff(P2,1,2),-P2(:,end,:)) + ...
             cat(3,P3(:,:,1),diff(P3,1,3),-P3(:,:,end));
-        
-        % Forward finite difference (returns two images!) [P1, P2] = L3(x)
-        L3 = @(D)deal(-diff(D,1,1),-diff(D,1,2),-diff(D,1,3));
-        [uk1, uk2, uk3] = L3(zeros(2*Ny, 2*Nx,Nz));
-        Lsk1 = uk1;
-        Lsk2 = uk2;
-        Lsk3 = uk3;
+       
+        % Sparsifying map
+        Psi = @(D)deal(-diff(D,1,1),-diff(D,1,2),-diff(D,1,3));
+        [uk1, uk2, uk3] = Psi(zeros(2*Ny, 2*Nx,Nz));
+        Lvk1 = uk1;
+        Lvk2 = uk2;
+        Lvk3 = uk3;
     case('tv_native')
         Ltv3 = @(P1,P2,P3,P4)cat(1,P1(1,:,:),diff(P1,1,1),-P1(end,:,:)) + ...
             cat(2,P2(:,1,:),diff(P2,1,2),-P2(:,end,:)) + ...
             cat(3,P3(:,:,1),diff(P3,1,3),-P3(:,:,end)) + ...
             solverSettings.tau_n*P4;
-        L3 = @(D)deal(-diff(D,1,1),-diff(D,1,2),-diff(D,1,3),solverSettings.tau_n*D);
-        [uk1, uk2, uk3, uk4] = L3(zeros(2*Ny, 2*Nx,Nz));
-        Lsk1 = uk1;
-        Lsk2 = uk2;
-        Lsk3 = uk3;
-        Lsk4 = uk4;
+        
+        
+        %Sparsifying with gradient and l1
+        Psi = @(D)deal(-diff(D,1,1),-diff(D,1,2),-diff(D,1,3),solverSettings.tau_n*D);
+        [uk1, uk2, uk3, uk4] = Psi(zeros(2*Ny, 2*Nx,Nz));
+        Lvk1 = uk1;
+        Lvk2 = uk2;
+        Lvk3 = uk3;
+        Lvk4 = uk4;
         eta_4 = zeros(2*Ny, 2*Nx, Nz);
         LtL = LtL + solverSettings.tau_n^2;
     case('native')
-        eta = zeros(2*Ny, 2*Nx, Nz);
+        
+        
+        Psi = @(x)x;   %Identity operator for native sparsity
+        uk = zeros(2*Ny, 2*Nx, Nz);
+        Lvk = uk;
+        eta = uk;
 end
 
 Smult = 1./(mu1*HtH + mu2*LtL + mu3);
@@ -101,85 +109,96 @@ primal_resid_w = dual_resid_s;
 f = primal_resid_u;
 ps = f;
 
-Hskp = zeros(2*Ny, 2*Nx,Nz);
+Hvkp = zeros(2*Ny, 2*Nx,Nz);
 
 while n<solverSettings.maxIter
     n = n+1;
-    
-    %[Lsk1, Lsk2, Lsk3] = L3(sk);
-    
-    %uk1_ = uk1;
-    %uk2_ = uk2;
-    %uk3_ = uk3;
-    Hsk = Hskp;
-    vkp = Vmult.*(mu1*(xi/mu1 + Hsk) + Dtb);
-    wkp = max(rho/mu3 + sk,0);
-    switch lower(sparsity_type)
+    Hvk = Hvkp;
+    nukp = Vmult.*(mu1*(xi/mu1 + Hvk) + Dtb);
+    wkp = max(rho/mu3 + vk,0);
+    switch lower(solverSettings.regularizer)
         case('tv')
-            [uk1, uk2, uk3] = soft_3d_gradient(Lsk1+eta_1/mu2, Lsk2+eta_2/mu2, Lsk3+eta_3/mu2,solverSettings.tau/mu2);
-            skp_numerator = mu3*(wkp-rho/mu3) + ...
+            [uk1, uk2, uk3] = DiffuserCam_soft_3d(Lvk1+eta_1/mu2, Lvk2+eta_2/mu2, Lvk3+eta_3/mu2,solverSettings.tau/mu2);
+            vkp_numerator = mu3*(wkp-rho/mu3) + ...
                 mu2*Ltv3(uk1 - eta_1/mu2,uk2 - eta_2/mu2, uk3 - eta_3/mu2) + ...
-                mu1*Hadj(vkp - xi/mu1);
+                mu1*Hadj(nukp - xi/mu1);
         case('tv_native')
-            uk4_ = uk4;
-            [uk1, uk2, uk3, uk4] = soft_3d_gradient(Lsk1 + eta_1/mu2, Lsk2 + eta_2/mu2, ...
-                Lsk3 + eta_3/mu2, solverSettings.tau/mu2, Lsk4 + eta_4/mu2);
-            skp_numerator = mu3*(wkp-rho/mu3) + ...
+            [uk1, uk2, uk3, uk4] = DiffuserCam_soft_3d(Lvk1 + eta_1/mu2, Lvk2 + eta_2/mu2, ...
+                Lvk3 + eta_3/mu2, solverSettings.tau/mu2, Lvk4 + eta_4/mu2);
+            vkp_numerator = mu3*(wkp-rho/mu3) + ...
                 mu2*Ltv3(uk1 - eta_1/mu2,uk2 - eta_2/mu2, uk3 - eta_3/mu2, uk4 - eta_4/mu2) + ...
-                mu1*Hadj(vkp - xi/mu1);
+                mu1*Hadj(nukp - xi/mu1);
+        case('native')
+            uk = DiffuserCam_soft_3d([],[],[],solverSettings.tau_n/mu2,Lvk + eta/mu2);
+    end
+            
+        
     end
     
     
-    skp = real(ifftshift(ifftn(Smult .* fftn(ifftshift(skp_numerator)))));
+    vkp = real(ifftshift(ifftn(Smult .* fftn(ifftshift(vkp_numerator)))));
     
     %Update dual and parameter for Hs=v constraint
-    Hskp = Hfor(skp);
-    r_sv = Hskp-vkp;
+    Hvkp = Hfor(vkp);
+    r_sv = Hvkp-nukp;
     xi = xi + mu1*r_sv;
-    dual_resid_s(n) = mu1*norm(vec(Hsk - Hskp));
+    dual_resid_s(n) = mu1*norm(vec(Hvk - Hvkp));
     primal_resid_s(n) = norm(vec(r_sv));
     [mu1, mu1_update] = update_param(mu1,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,primal_resid_s(n),dual_resid_s(n));
     
     % Update dual and parameter for Ls=v
-    Lsk1_ = Lsk1;
-    Lsk2_ = Lsk2;
-    Lsk3_ = Lsk3;
-    switch lower(sparsity_type)
+    
+    switch lower(solverSettings.regularizer)
         case('tv')
-            [Lsk1, Lsk2, Lsk3] = L3(skp);
-            r_su_1 = Lsk1 - uk1;
-            r_su_2 = Lsk2 - uk2;
-            r_su_3 = Lsk3 - uk3;
+            Lvk1_ = Lvk1;
+            Lvk2_ = Lvk2;
+            Lvk3_ = Lvk3;
+            [Lvk1, Lvk2, Lvk3] = Psi(vkp);
+            r_su_1 = Lvk1 - uk1;
+            r_su_2 = Lvk2 - uk2;
+            r_su_3 = Lvk3 - uk3;
             eta_1 = eta_1 + mu2*r_su_1;
             eta_2 = eta_2 + mu2*r_su_2;
             eta_3 = eta_3 + mu2*r_su_3;
-            dual_resid_u(n) = mu2*sqrt(norm(vec(Lsk1_ - Lsk1))^2 + norm(vec(Lsk2_ - Lsk2))^2 + norm(vec(Lsk3_ - Lsk3))^2);
+            dual_resid_u(n) = mu2*sqrt(norm(vec(Lvk1_ - Lvk1))^2 + norm(vec(Lvk2_ - Lvk2))^2 + norm(vec(Lvk3_ - Lvk3))^2);
             primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + norm(vec(r_su_3))^2);
         case('tv_native')
-            Lsk4_ = Lsk4;
-            [Lsk1, Lsk2, Lsk3, Lsk4] = L3(skp);
-            r_su_1 = Lsk1 - uk1;
-            r_su_2 = Lsk2 - uk2;
-            r_su_3 = Lsk3 - uk3;
-            r_su_4 = Lsk4 - uk4;
+            Lvk1_ = Lvk1;
+            Lvk2_ = Lvk2;
+            Lvk3_ = Lvk3;
+            Lvk4_ = Lvk4;
+            [Lvk1, Lvk2, Lvk3, Lvk4] = Psi(vkp);
+            r_su_1 = Lvk1 - uk1;
+            r_su_2 = Lvk2 - uk2;
+            r_su_3 = Lvk3 - uk3;
+            r_su_4 = Lvk4 - uk4;
             eta_1 = eta_1 + mu2*r_su_1;
             eta_2 = eta_2 + mu2*r_su_2;
             eta_3 = eta_3 + mu2*r_su_3;
             eta_4 = eta_4 + mu2*r_su_4;
-            dual_resid_u(n) = mu2*sqrt(norm(vec(Lsk1_ - Lsk1))^2 + norm(vec(Lsk2_ - Lsk2))^2 + ...
-                norm(vec(Lsk3_ - Lsk3))^2 + norm(vec(Lsk4_ - Lsk4))^2);
+            dual_resid_u(n) = mu2*sqrt(norm(vec(Lvk1_ - Lvk1))^2 + norm(vec(Lvk2_ - Lvk2))^2 + ...
+                norm(vec(Lvk3_ - Lvk3))^2 + norm(vec(Lvk4_ - Lvk4))^2);
             primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + ...
                 norm(vec(r_su_3))^2 + norm(vec(r_su_4))^2);
+        case('native')
+            Lvk_ = Lvk;
+            Lvk = Psi(vkp);
+            r_su = Lvk - uk;
+            eta = eta + mu2*r_su;
+            dual_resid_u(n) = mu2*norm(vec(Lvk_ - Lvk));
+            primal_resid_u(n) = norm(vec(r_su));
     end
     
     
     
-    [mu2, mu2_update] = update_param(mu2,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,primal_resid_u(n),dual_resid_u(n));
+    [mu2, mu2_update] = update_param(mu2,solverSettings.resid_tol,...
+        solverSettings.mu_inc,solverSettings.mu_dec,...
+        primal_resid_u(n),dual_resid_u(n));
     
     % Update nonnegativity dual and parameter (s=w)
-    r_sw = skp-wkp;
+    r_sw = vkp-wkp;
     rho = rho + mu3*r_sw;
-    dual_resid_w(n) = mu3*norm(vec(sk - skp));
+    dual_resid_w(n) = mu3*norm(vec(vk - vkp));
     primal_resid_w(n) = norm(vec(r_sw));
     [mu3, mu3_update] = update_param(mu3,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,primal_resid_w(n),dual_resid_w(n));
     
@@ -196,52 +215,35 @@ while n<solverSettings.maxIter
     end
     
     
-    sk = skp;
-    ps(n) = 1/(norm(vec(crop2d(skp))-vec(imres),1));
-    f(n) = norm(crop3d(Hskp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lsk1))) + sum(vec(abs(Lsk2))) + sum(vec(abs(Lsk3))) + solverSettings.tau_n*sum(vec(abs(Lsk4))));
-    if mod(n,10)==0
-        
-        fprintf('iter: %i \t cost: %.4f \t Primal v: %.4f \t Dual v: %.4f \t Primal u: %.4f \t Dual u: %.4f \t Primal w: %.4f \t Dual w: %.4f \t mu1: %.4f \t mu2: %.4f \t mu3: %.4f \n',...
-            n,f(n),primal_resid_s(n), dual_resid_s(n),primal_resid_u(n), dual_resid_u(n),primal_resid_w(n), dual_resid_w(n),mu1,mu2,mu3)
-        
-        set(0,'CurrentFigure',h1);
-        
-        imagesc(crop2d(max(skp,[],3)));
-        axis image
-        colormap parula
-        drawnow
-        
-        if n > 50
-            set(0,'CurrentFigure',h2)
-            plot(ps(n-49:n));
-        end
-        
-        
-        
+    vk = vkp;
+    ps(n) = 1/(norm(vec(crop2d(vkp))-vec(imres),1));
+    f(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3))) + solverSettings.tau_n*sum(vec(abs(Lvk4))));
+    if mod(n,solverSettings.disp_figs)
+        draw_figures(vk)
     end
 end
 
 
 % Private function to display figures
-function draw_figures(xk,options)
-set(0,'CurrentFigure',options.fighandle)
+function draw_figures(xk)
+set(0,'CurrentFigure',solverSettings.fighandle)
 if numel(size(xk))==2
-    imagesc(options.display_func(xk))
+    imagesc(solverSettings.display_func(xk))
     axis image
     colorbar
-    colormap(options.color_map);
+    colormap(solverSettings.color_map);
     
 elseif numel(size(xk))==3
     xk = gather(xk);
     subplot(1,3,1)
     
     im1 = squeeze(max(xk,[],3));
-    imagesc(options.display_func(im1));
+    imagesc(solverSettings.display_func(im1));
     hold on
     axis image
     colormap parula
     %colorbar
-    caxis([0 prctile(im1(:),options.disp_percentile)])
+    caxis([0 prctile(im1(:),solverSettings.disp_percentile)])
     set(gca,'fontSize',6)
     axis off
     title('XY')
@@ -255,7 +257,7 @@ elseif numel(size(xk))==3
     colormap parula
     %colorbar
     set(gca,'fontSize',8)
-    caxis([0 prctile(im2(:),options.disp_percentile)])
+    caxis([0 prctile(im2(:),solverSettings.disp_percentile)])
     title('XZ')
     axis off
     hold off
@@ -263,14 +265,14 @@ elseif numel(size(xk))==3
     
     subplot(1,3,3)
     im3 = squeeze(max(xk,[],2));
-    imagesc(options.disp_func(im3));
+    imagesc(solverSettings.disp_func(im3));
     hold on
     %axis image
     colormap parula
     title('YZ')
     colorbar   
     set(gca,'fontSize',8)
-    caxis([0 prctile(im3(:),options.disp_percentile)]);
+    caxis([0 prctile(im3(:),solverSettings.disp_percentile)]);
     axis off
     hold off
     
