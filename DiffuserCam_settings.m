@@ -27,18 +27,18 @@ solverSettings.autotune = 1;    % default: 1
 solverSettings.mu_inc = 1.01;   % 
 solverSettings.mu_dec = 1.01;  %Inrement and decrement values for mu during autotune.
 solverSettings.resid_tol = 5;   % Primal/dual gap tolerance. Lower means more frequent tuning
-solverSettings.maxIter = 500; % Maximum iteration count  Default: 200
+solverSettings.maxIter = 5000; % Maximum iteration count  Default: 200
 solverSettings.regularizer = 'TV';   %'TV' for 3D TV, 'l1' for native. Default: TV
 
 %Figures and user info
-options.disp_percentile = 99.9;   %Percentile of max to set image scaling
+solverSettings.disp_percentile = 99.9;   %Percentile of max to set image scaling
 solverSettings.save_every = 50;   %Save image stack as .mat every N iterations. Use 0 to never save (except for at the end);
 
 %Folder for saving state. If it doesn't exist, create it. 
 solverSettings.save_dir = '~/Documents/Diffusers/Lensless/3d_reconstructions/test';
 % Strip / from path if used
 
-solverSettings.display_func = @(x)x;  %Function handle to modify image before display. No change to data, just for display purposes
-solverSettings.disp_figs = 1;   %If set to 0, never display. If set to N>=1, show every N.
+solverSettings.disp_func = @(x)x;  %Function handle to modify image before display. No change to data, just for display purposes
+solverSettings.disp_figs = 10;   %If set to 0, never display. If set to N>=1, show every N.
 solverSettings.print_interval = 10;  %Print cost every N iterations. Default 1. If set to 0, don't print.
 fig_num = 1;   %Figure number to display in

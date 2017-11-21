@@ -169,6 +169,7 @@ while n<solverSettings.maxIter
             eta_3 = eta_3 + mu2*r_su_3;
             f.dual_resid_u(n) = mu2*sqrt(norm(vec(Lvk1_ - Lvk1))^2 + norm(vec(Lvk2_ - Lvk2))^2 + norm(vec(Lvk3_ - Lvk3))^2);
             f.primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + norm(vec(r_su_3))^2);
+            f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3))));
         case('tv_native')
             Lvk1_ = Lvk1;
             Lvk2_ = Lvk2;
@@ -187,6 +188,7 @@ while n<solverSettings.maxIter
                 norm(vec(Lvk3_ - Lvk3))^2 + norm(vec(Lvk4_ - Lvk4))^2);
             f.primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + ...
                 norm(vec(r_su_3))^2 + norm(vec(r_su_4))^2);
+           f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3)))) + solverSettings.tau_n*sum(vec(abs(Lvk4)));
         case('native')
             Lvk_ = Lvk;
             Lvk = Psi(vkp);
@@ -194,6 +196,7 @@ while n<solverSettings.maxIter
             eta = eta + mu2*r_su;
             f.dual_resid_u(n) = mu2*norm(vec(Lvk_ - Lvk));
             f.primal_resid_u(n) = norm(vec(r_su));
+            f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau_n*(sum(vec(abs(Lvk))));
     end
     
     
@@ -223,16 +226,16 @@ while n<solverSettings.maxIter
     
     
     vk = vkp;
-    f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3))) + solverSettings.tau_n*sum(vec(abs(Lvk4))));
-    if mod(n,solverSettings.disp_figs)
-        draw_figures(vk)
+    
+    if mod(n,solverSettings.disp_figs) == 0
+        draw_figures(vk,solverSettings)
     end
 end
 end
 
 
 % Private function to display figures
-function draw_figures(xk)
+function draw_figures(xk, solverSettings)
 set(0,'CurrentFigure',solverSettings.fighandle)
 if numel(size(xk))==2
     imagesc(solverSettings.display_func(xk))

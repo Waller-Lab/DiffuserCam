@@ -20,7 +20,7 @@ end
 
 %Make figure handle
 
-if solverSettings.disp_figs
+if solverSettings.disp_figs ~= 0
     solverSettings.fighandle = figure(fig_num);
     clf
 end
@@ -86,8 +86,7 @@ if exist([out_file,'.mat'],'file')
     dtstamp = datestr(datetime('now'),'YYYYMMDD_hhmmss');
     out_file = [out_file,'_',dtstamp];
 end
-xhat = [];
-f = [];
+[xhat, f] = ADMM3D_solver(psf,b,solverSettings);
 save([out_file,'.mat'],'xhat','b','f','raw_in');   %Save result
 copyfile(config,solverSettings.save_dir)  %Copy settings into save directory
 
