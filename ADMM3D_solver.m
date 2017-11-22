@@ -46,9 +46,10 @@ pad2d = @(x)padarray(x,[p1,p2],'both');  %2D padding
 crop2d = @(x)x(p1+1:end-p1,p2+1:end-p2,:); %2D cropping
 crop3d = @(x)crop2d(x(:,:,1));   %3D cropping. This is D
 pad3d = @(x)padarray(pad2d(x),[0 0 Nz-1],'post');
-hs = circshift(flip(psf,3),ceil(Nz/2)+1,3)/norm(psf(:));  %Shift impulse stack
-Hs = fftn(ifftshift(pad2d(hs)));  %Compute 3D spectrum
+psf = circshift(flip(psf,3),ceil(Nz/2)+1,3)/norm(psf(:));  %Shift impulse stack
+Hs = fftn(ifftshift(pad2d(psf)));  %Compute 3D spectrum
 Hs_conj = conj(Hs);
+clear psf
 Hfor = @(x)real(ifftshift(ifftn(Hs.*fftn(ifftshift(x)))));
 Hadj = @(x)real(ifftshift(ifftn(Hs_conj.*fftn(ifftshift(x)))));
 HtH = abs(Hs.*Hs_conj);
@@ -90,11 +91,15 @@ switch lower(solverSettings.regularizer)
         Lvk2 = uk2;
         Lvk3 = uk3;
         Lvk4 = uk4;
+        eta_1 = zeros(2*Ny-1,2*Nx,Nz);  %Duals associatd with Psi v = u (TV sparsity)
+        eta_2 = zeros(2*Ny,2*Nx-1,Nz);
+        eta_3 = zeros(2*Ny,2*Nx,Nz-1);
         eta_4 = zeros(2*Ny, 2*Nx, Nz);
         PsiTPsi = PsiTPsi + solverSettings.tau_n^2;
     case('native')
         
         PsiTPsi = 1;
+        PsiT = @(x)x;
         Psi = @(x)x;   %Identity operator for native sparsity
         uk = zeros(2*Ny, 2*Nx, Nz);
         Lvk = uk;
@@ -117,7 +122,8 @@ f.primal_resid_u = f.dual_resid_u;
 f.dual_resid_w = f.dual_resid_s;
 f.primal_resid_w = f.dual_resid_s;
 f.objective = f.primal_resid_u;   
-
+f.data_fidelity = f.primal_resid_u;
+f.regularizer_penalty = f.primal_resid_u;
 Hvkp = zeros(2*Ny, 2*Nx,Nz);
 
 while n<solverSettings.maxIter
@@ -139,7 +145,7 @@ while n<solverSettings.maxIter
                 mu1*Hadj(nukp - xi/mu1);
         case('native')
             uk = DiffuserCam_soft_3d([],[],[],solverSettings.tau_n/mu2,Lvk + eta/mu2);
-            vkp_numerator = mu3*(wkp-rho/mu3) + PsiT(uk - eta/mu2) + Hadj(nukp - xi/mu1);
+            vkp_numerator = mu3*(wkp-rho/mu3) + mu2*PsiT(uk - eta/mu2) + mu1*Hadj(nukp - xi/mu1);
     end
     
     
@@ -154,7 +160,7 @@ while n<solverSettings.maxIter
     [mu1, mu1_update] = update_param(mu1,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,f.primal_resid_s(n),f.dual_resid_s(n));
     
     % Update dual and parameter for Ls=v
-    
+    f.data_fidelity(n) = .5*norm(crop3d(Hvkp)-b,'fro')^2;
     switch lower(solverSettings.regularizer)
         case('tv')
             Lvk1_ = Lvk1;
@@ -169,7 +175,8 @@ while n<solverSettings.maxIter
             eta_3 = eta_3 + mu2*r_su_3;
             f.dual_resid_u(n) = mu2*sqrt(norm(vec(Lvk1_ - Lvk1))^2 + norm(vec(Lvk2_ - Lvk2))^2 + norm(vec(Lvk3_ - Lvk3))^2);
             f.primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + norm(vec(r_su_3))^2);
-            f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3))));
+            f.regularizer_penalty(n) = solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3))));
+            
         case('tv_native')
             Lvk1_ = Lvk1;
             Lvk2_ = Lvk2;
@@ -188,7 +195,7 @@ while n<solverSettings.maxIter
                 norm(vec(Lvk3_ - Lvk3))^2 + norm(vec(Lvk4_ - Lvk4))^2);
             f.primal_resid_u(n) = sqrt(norm(vec(r_su_1))^2 + norm(vec(r_su_2))^2 + ...
                 norm(vec(r_su_3))^2 + norm(vec(r_su_4))^2);
-           f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3)))) + solverSettings.tau_n*sum(vec(abs(Lvk4)));
+           f.regularizer_penalty(n) = solverSettings.tau*(sum(vec(abs(Lvk1))) + sum(vec(abs(Lvk2))) + sum(vec(abs(Lvk3)))) + solverSettings.tau_n*sum(vec(abs(Lvk4)));
         case('native')
             Lvk_ = Lvk;
             Lvk = Psi(vkp);
@@ -196,9 +203,9 @@ while n<solverSettings.maxIter
             eta = eta + mu2*r_su;
             f.dual_resid_u(n) = mu2*norm(vec(Lvk_ - Lvk));
             f.primal_resid_u(n) = norm(vec(r_su));
-            f.objective(n) = norm(crop3d(Hvkp)-b,'fro')^2 + solverSettings.tau_n*(sum(vec(abs(Lvk))));
+            f.regularizer_penalty(n) = solverSettings.tau_n*(sum(vec(abs(Lvk))));
     end
-    
+    f.objective(n) = f.data_fidelity(n) + f.regularizer_penalty(n);
     
     
     [mu2, mu2_update] = update_param(mu2,solverSettings.resid_tol,...
@@ -214,7 +221,7 @@ while n<solverSettings.maxIter
     
     %Update filters
     if mu1_update || mu2_update || mu3_update
-        fprintf('Mu updates: %i \t %i \t %i\n',mu1_update, mu2_update, mu3_update);
+        %fprintf('Mu updates: %i \t %i \t %i\n',mu1_update, mu2_update, mu3_update);
         mu_update = 1;
     else
         mu_update = 0;
@@ -229,6 +236,12 @@ while n<solverSettings.maxIter
     
     if mod(n,solverSettings.disp_figs) == 0
         draw_figures(vk,solverSettings)
+    end
+    
+    if mod(n,solverSettings.print_interval) == 0
+         fprintf('iter: %i \t cost: %.2g \t data_fidelity: %.2g \t norm: %.2g \t Primal v: %.2g \t Dual v: %.2g \t Primal u: %.2g \t Dual u: %.2g \t Primal w: %.2g \t Dual w: %.2g \t mu1: %.2g \t mu2: %.2g \t mu3: %.2g \n',...
+            n,f.objective(n),f.data_fidelity(n),f.regularizer_penalty(n),f.primal_resid_s(n), f.dual_resid_s(n),f.primal_resid_u(n), f.dual_resid_u(n),f.primal_resid_w(n), f.dual_resid_w(n),mu1,mu2,mu3)
+            %disp([n,f.objective(n),f.data_fidelity(n),f.regularizer_penalty(n),f.primal_resid_s(n), f.dual_resid_s(n),f.primal_resid_u(n), f.dual_resid_u(n),f.primal_resid_w(n), f.dual_resid_w(n),mu1,mu2,mu3])
     end
 end
 end

@@ -32,13 +32,13 @@ if (axial_downsample < 1 )
     error('axial_downsample must be >= 1')
 end
 %Load and prepare impulse stack
-psf_in = load(impulse_mat_file_name);
-psf = psf_in.(impulse_var_name);
+psf = load(impulse_mat_file_name,impulse_var_name);
+psf = psf.(impulse_var_name);
 
 % Get impulse dimensions
 [~,~, Nz_in] = size(psf);
 
-if end_z == 0 || end_z > Nz_in;
+if end_z == 0 || end_z > Nz_in
     end_z = Nz_in;
 end
 
@@ -56,9 +56,9 @@ end
 
 [Ny, Nx, Nz] = size(psf);
 % Normalize each slice
-for n = 1:Nz
-    psf(:,:,n) = psf(:,:,n)/norm(psf(:,:,n),'fro');
-end
+%for n = 1:Nz
+%    psf(:,:,n) = psf(:,:,n)/norm(psf(:,:,n),'fro');
+%end
 
 % Load image file and adjust to impulse size.
 raw_in = imread(image_file);
@@ -75,7 +75,6 @@ else
 end
 
 b = imresize(imc - image_bias,[Ny, Nx],'box');
-
 
 % Solver stuff
 
