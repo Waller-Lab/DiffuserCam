@@ -157,7 +157,7 @@ while n<solverSettings.maxIter
     xi = xi + mu1*r_sv;
     f.dual_resid_s(n) = mu1*norm(vec(Hvk - Hvkp));
     f.primal_resid_s(n) = norm(vec(r_sv));
-    [mu1, mu1_update] = update_param(mu1,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,f.primal_resid_s(n),f.dual_resid_s(n));
+    [mu1, mu1_update] = ADMM3D_update_param(mu1,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,f.primal_resid_s(n),f.dual_resid_s(n));
     
     % Update dual and parameter for Ls=v
     f.data_fidelity(n) = .5*norm(crop3d(Hvkp)-b,'fro')^2;
@@ -208,7 +208,7 @@ while n<solverSettings.maxIter
     f.objective(n) = f.data_fidelity(n) + f.regularizer_penalty(n);
     
     
-    [mu2, mu2_update] = update_param(mu2,solverSettings.resid_tol,...
+    [mu2, mu2_update] = ADMM3D_update_param(mu2,solverSettings.resid_tol,...
         solverSettings.mu_inc,solverSettings.mu_dec,...
         f.primal_resid_u(n),f.dual_resid_u(n));
     
@@ -217,7 +217,7 @@ while n<solverSettings.maxIter
     rho = rho + mu3*r_sw;
     f.dual_resid_w(n) = mu3*norm(vec(vk - vkp));
     f.primal_resid_w(n) = norm(vec(r_sw));
-    [mu3, mu3_update] = update_param(mu3,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,f.primal_resid_w(n),f.dual_resid_w(n));
+    [mu3, mu3_update] = ADMM3D_update_param(mu3,solverSettings.resid_tol,solverSettings.mu_inc,solverSettings.mu_dec,f.primal_resid_w(n),f.dual_resid_w(n));
     
     %Update filters
     if mu1_update || mu2_update || mu3_update
@@ -314,6 +314,19 @@ function PsiTPsi = generate_laplacian(Ny,Nx,Nz)
     lapl(end,1,1) = -1;
     lapl(1,1,end) = -1;
     PsiTPsi = abs(fftn(lapl));   %Compute power spectrum of laplacian
+end
+
+function [mu_out, mu_update] = ADMM3D_update_param(mu,resid_tol,mu_inc,mu_dec,r,s)
+    if r > resid_tol*s
+        mu_out = mu*mu_inc;
+        mu_update = 1;
+    elseif r*resid_tol < s
+        mu_out = mu/mu_dec;
+        mu_update = -1;
+    else
+        mu_out = mu;
+        mu_update = 0;
+    end
 end
     
     
