@@ -16,7 +16,9 @@ nav ul { margin: 0; }
 nav ul li { display: inline; margin-right: 20px; font-size: 16px; line-height: 28px; color: #333; }
 nav ul li a { color: #333; }
 
-.container { position: relative; text-align: left; width: 960px; max-width: 60%; margin: 0 auto; border-top:50px solid #fff;}
+.container { position: relative; text-align: left; width: 960px; max-width: 60%; margin: 0 auto; border-top:70px solid #fff;}
+.container-nav { position: relative; text-align: left; width: 960px; max-width: 60%; margin: 0 auto; border-top:0px solid #fff;}
+.container-80 { position: relative; text-align: left; width: 960px; max-width: 80%; margin: 0 auto; border-top:0px solid #fff;}
 
 footer { border-top:1px solid #ccc; font-size:11px; line-height:26px; color:#999; }
 footer a { color:#999999; }

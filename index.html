@@ -1,41 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-110853731-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-110853731-1');
-</script>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-110853731-1"></script>
+	<script>
+  		window.dataLayer = window.dataLayer || [];
+  		function gtag(){dataLayer.push(arguments);}
+  		gtag('js', new Date());
+  		gtag('config', 'UA-110853731-1');
+	</script>
 
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
 	<title>DiffuserCam</title>
 
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
 	<link href="styles/minimal.css" rel="stylesheet">
 </head>
+
 <body>
+<!-- Navigation bar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container-nav">	
+		<div class="container-fluid">
+    		<ul class="nav navbar-nav">
+      			<li class="active"><a href="#">Home</a></li>
+      			<li><a href="gallery.html">Gallery</a></li>
+      			<li><a href="https://github.com/Waller-Lab/DiffuserCam">Code</a></li>
+    		</ul>
+      	</div>
+  	</div>	
+</nav> 
+
 <div class="container">
 
 	<div class="row">	
-		<h1>DiffuserCam: Lensless Single-exposure 3D Imaging</h1>
-		<h5>Nick Antipa*, <a href="https://people.eecs.berkeley.edu/~gkuo/">Grace Kuo*</a>, <a href="http://www.reinhardheckel.com">Reinhard Heckel</a>, <a href="https://people.eecs.berkeley.edu/~bmild/">Ben Mildenhall</a>, Emrah Bostan, <a href="https://www2.eecs.berkeley.edu/Faculty/Homepages/yirenng.html">Ren Ng</a>, and <a href="http://www.laurawaller.com/">Laura Waller</a></h5>
+		<h1><b>DiffuserCam: Lensless Single-exposure 3D Imaging</b></h1>
+		<h5><b>Nick Antipa*, <a href="https://people.eecs.berkeley.edu/~gkuo/">Grace Kuo*</a>, <a href="http://www.reinhardheckel.com">Reinhard Heckel</a>, <a href="https://people.eecs.berkeley.edu/~bmild/">Ben Mildenhall</a>, Emrah Bostan, <a href="https://www2.eecs.berkeley.edu/Faculty/Homepages/yirenng.html">Ren Ng</a>, and <a href="http://www.laurawaller.com/">Laura Waller</a></b></h5>
 		<br />
-		<img src="resources/setup.png" style="width:600px"> 
+		<img class="center" src="resources/setup.png" style="width:600px"> 
 	</div>
 
 
 	<div class="row">
-		<h3>Abstract</h3>
+		<h3><b>Abstract</b></h3>
 		<p>We demonstrate a compact and easy-to-build computational camera for single-shot 3D imaging. Our lensless system consists solely of a diffuser placed in front of a standard image sensor. Every point within the volumetric field-of-view projects a unique pseudorandom pattern of caustics on the sensor. By using a physical approximation and simple calibration scheme, we solve the large-scale inverse problem in a computationally efficient way. The caustic patterns enable compressed sensing, which exploits sparsity in the sample to solve for more 3D voxels than pixels on the 2D sensor. Our 3D reconstruction grid is chosen to match the experimentally measured two-point optical resolution, resulting in 100 million voxels being reconstructed from a single 1.3 megapixel image. However, the effective resolution varies significantly with scene content. Because this effect is common to a wide range of computational cameras, we provide new theory for analyzing resolution in such systems.</p>
 	</div>
 
 	<div class="row">
-		<h3>Resources</h3>
+		<h3><b>Resources</b></h3>
 		<ul>
 			<li>Open source code on <b><a href="https://github.com/Waller-Lab/DiffuserCam">GitHub</a></b></li>
 			<li>Paper preprint on <b><a href="https://arxiv.org/abs/1710.02134">arXiv</a></b></li>
@@ -44,7 +62,7 @@
 	</div>
 
 	<div class="row">
-		<h3>Conference Papers</h3>
+		<h3><b>Conference Papers</b></h3>
 
 		<p>Grace Kuo*, Nick Antipa*, Ren Ng, and Laura Waller. "DiffuserCam: Diffuser-Based Lensless Cameras." <i>Computational Optical Sensing and Imaging.</i> Optical Society of America, 2017.</p>
 
@@ -52,7 +70,7 @@
 	</div>
 
 	<div class="row">
-		<h3>Awards</h3>
+		<h3><b>Awards</b></h3>
 		<p>Best Demo (people's choice) at the International Conference on Computational Photography (ICCP) 2017:<br />
 		DiffuserCam: A Diffuser Based Lensless Camera<br />
 		Grace Kuo, Nick Antipa, Shreyas Parthasarathy, Camille Biscarrat, Ben Mildenhall, Ren Ng, and Laura Waller</p>
@@ -60,11 +78,9 @@
 
 		
 
-
-	<footer>
-			<a href=#>DiffuserCam </a>
-			<a class="float-right">Last updated December 8, 2017</a>
-	</footer>
 </div>
+<nav class="navbar navbar-default">
+</nav>
+
 </body>
 </html>
