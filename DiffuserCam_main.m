@@ -95,6 +95,8 @@ save([out_file,'.mat'],'xhat','b','f','raw_in');   %Save result
 slashes = strfind(config,'/');
 if ~isempty(slashes)
     config_fname = config(slashes(end)+1:end-2);
+else
+    config_fname = config(1:end-2);
 end
 copyfile(config,[solverSettings.save_dir,'/',config_fname,'_',dtstamp,'.m'])  %Copy settings into save directory
 
