@@ -14,7 +14,7 @@ if solverSettings.save_dir(end) == '/'
     solverSettings.save_dir = solverSettings.save_dir(1:end-1);
 end
     
-if ~exist(solverSettings.save_dir,'dir') && solverSettings.save_every ~= 0
+if ~exist(solverSettings.save_dir,'dir')
     mkdir(solverSettings.save_dir);
 end
 

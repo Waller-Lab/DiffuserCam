@@ -34,8 +34,10 @@ solverSettings.regularizer = 'TV';   %'TV' for 3D TV, 'native' for native. Defau
  
 %Figures and user info
 solverSettings.disp_percentile = 99.9;   %Percentile of max to set image scaling
-solverSettings.save_every = 50;   %Save image stack as .mat every N iterations. Use 0 to never save (except for at the end);
- 
+solverSettings.save_every = 0;   %Save image stack as .mat every N iterations. Use 0 to never save (except for at the end);
+if solverSettings.save_every
+    warning(' save_every is not enabled yet. Your result will only be saved at the end of processing.')
+end
 %Folder for saving state. If it doesn't exist, create it. 
 solverSettings.save_dir = '~/Documents/Diffusers/Lensless/3d_reconstructions/test';
 % Strip / from path if used
