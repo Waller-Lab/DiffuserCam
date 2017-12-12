@@ -39,7 +39,7 @@ if solverSettings.save_every
     warning(' save_every is not enabled yet. Your result will only be saved at the end of processing.')
 end
 %Folder for saving state. If it doesn't exist, create it. 
-solverSettings.save_dir = '~/Documents/Diffusers/Lensless/3d_reconstructions/test';
+solverSettings.save_dir = '../DiffuserCamResults/demo';
 % Strip / from path if used
  
 solverSettings.disp_func = @(x)x;  %Function handle to modify image before display. No change to data, just for display purposes

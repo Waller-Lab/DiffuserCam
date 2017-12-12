@@ -92,6 +92,10 @@ if exist([out_file,'.mat'],'file')
 end
 [xhat, f] = ADMM3D_solver(psf,b,solverSettings);
 save([out_file,'.mat'],'xhat','b','f','raw_in');   %Save result
-copyfile(config,solverSettings.save_dir)  %Copy settings into save directory
+slashes = strfind(config,'/');
+if ~isempty(slashes)
+    config_fname = config(slashes(end)+1:end-2);
+end
+copyfile(config,[solverSettings.save_dir,'/',config_fname,'_',dtstamp,'.m'])  %Copy settings into save directory
 
 
