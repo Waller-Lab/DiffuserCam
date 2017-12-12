@@ -45,12 +45,12 @@ end
 psf = psf(:,:,start_z:end_z);  %Overwrite to save memory
 
 % Do downsampling
-for n = 1:lateral_downsample/2
+for n = 1:log2(lateral_downsample)
     psf = 1/4*(psf(1:2:end,1:2:end,:)+psf(1:2:end,2:2:end,:) + ...
         psf(2:2:end,1:2:end,:) + psf(2:2:end,2:2:end,:));
 end
 
-for n = 1:axial_downsample/2
+for n = 1:log2(axial_downsample)
     psf = 1/2*(psf(:,:,1:2:end)+psf(:,:,2:2:end));
 end
 
@@ -62,7 +62,12 @@ end
 
 % Load image file and adjust to impulse size.
 raw_in = imread(image_file);
-colind = find(contains({'red','green','blue'},color_to_process));
+switch color_to_process
+    case 'red'; colind = 1;
+    case 'green'; colind = 2;
+    case 'blue'; colind = 3;
+end
+
 
 if numel(size(image_file)) == 3
     if strcmpi(color_to_process,'mono')
