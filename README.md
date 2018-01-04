@@ -1,8 +1,9 @@
 # DiffuserCam Algorithms
-This code is based on the paper "DiffuserCam: Lensless Single-exposure 3D Imaging" available on [arXiv](https://arxiv.org/abs/1710.02134). It implements the alternating direction method of multipliers (ADMM) algorithm described in the paper for recovering 3D volumes from 2D raw data captured with DiffuserCam.
+This code is based on the paper "DiffuserCam: Lensless Single-exposure 3D Imaging" available [here](https://www.osapublishing.org/optica/abstract.cfm?uri=optica-5-1-1). It implements the alternating direction method of multipliers (ADMM) algorithm described in the paper for recovering 3D volumes from 2D raw data captured with DiffuserCam. This code requires MATLAB.
 
 
 ### Running the solver
+In MATLAB, run the following:
 ```
 xhat = DiffuserCam_main('DiffuserCam_settings.m');
 ```
