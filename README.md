@@ -1,4 +1,5 @@
 # DiffuserCam Algorithms
+#### [Project Page](https://waller-lab.github.io/DiffuserCam/) / [PDF](https://www.osapublishing.org/optica/abstract.cfm?uri=optica-5-1-1)
 This code is based on the paper "DiffuserCam: Lensless Single-exposure 3D Imaging" available [here](https://www.osapublishing.org/optica/abstract.cfm?uri=optica-5-1-1). It implements the alternating direction method of multipliers (ADMM) algorithm described in the paper for recovering 3D volumes from 2D raw data captured with DiffuserCam. This code requires MATLAB.
 
 
