@@ -13,7 +13,7 @@ run(config); %This should be a string path to a .m script that populates a bunch
 if solverSettings.save_dir(end) == '/'
     solverSettings.save_dir = solverSettings.save_dir(1:end-1);
 end
-    
+solverSettings.save_dir = [solverSettings.save_dir,'/',solverSettings.dtstamp];
 if ~exist(solverSettings.save_dir,'dir')
     mkdir(solverSettings.save_dir);
 end
@@ -42,7 +42,7 @@ if end_z == 0 || end_z > Nz_in
     end_z = Nz_in;
 end
 
-psf = psf(:,:,start_z:end_z);  %Overwrite to save memory
+psf = psf(:,:,start_z:end_z) - psf_bias;  %Overwrite to save memory
 
 % Do downsampling
 for n = 1:log2(lateral_downsample)
@@ -54,11 +54,7 @@ for n = 1:log2(axial_downsample)
     psf = 1/2*(psf(:,:,1:2:end)+psf(:,:,2:2:end));
 end
 
-[Ny, Nx, Nz] = size(psf);
-% Normalize each slice
-%for n = 1:Nz
-%    psf(:,:,n) = psf(:,:,n)/norm(psf(:,:,n),'fro');
-%end
+[Ny, Nx, ~] = size(psf);
 
 % Load image file and adjust to impulse size.
 raw_in = imread(image_file);
@@ -79,25 +75,30 @@ else
     imc = double(raw_in);
 end
 
-b = imresize(imc - image_bias,[Ny, Nx],'box');
+b = imresize(imc - image_bias,[Ny, Nx],'box'); %Subtract camera bias
+b = b/max(b(:));  %Normalize measurement
+
 
 % Solver stuff
 
+out_file = save_state(solverSettings,solverSettings.maxIter);
 
-out_file = [solverSettings.save_dir,'/state_',num2str(solverSettings.maxIter)];
-if exist([out_file,'.mat'],'file')
-    fprintf('file already exists. Adding datetime stamp to avoid overwriting. \n');
-    dtstamp = datestr(datetime('now'),'YYYYMMDD_hhmmss');
-    out_file = [out_file,'_',dtstamp];
-end
-[xhat, f] = ADMM3D_solver(psf,b,solverSettings);
-save([out_file,'.mat'],'xhat','b','f','raw_in');   %Save result
-slashes = strfind(config,'/');
-if ~isempty(slashes)
-    config_fname = config(slashes(end)+1:end-2);
+if useGpu
+    [xhat, f] = ADMM3D_solver(gpuArray(single(psf)),gpuArray(single(b)),solverSettings);
 else
-    config_fname = config(1:end-2);
+    [xhat, f] = ADMM3D_solver(single(psf),single(b),solverSettings);
 end
-copyfile(config,[solverSettings.save_dir,'/',config_fname,'_',dtstamp,'.m'])  %Copy settings into save directory
-
+if save_results
+    fprintf('saving final results. Please wait. \n')
+    xhat_out = gather(xhat);
+    save(out_file,'xhat_out','b','f','raw_in');   %Save result
+    slashes = strfind(config,'/');
+    if ~isempty(slashes)
+        config_fname = config(slashes(end)+1:end-2);
+    else
+        config_fname = config(1:end-2);
+    end
+    copyfile(config,[solverSettings.save_dir,'/',config_fname,'_',solverSettings.dtstamp,'.m']);  %Copy settings into save directory
+    fprintf(['Done. Results saved to ',out_file,'\n'])
+end
 
