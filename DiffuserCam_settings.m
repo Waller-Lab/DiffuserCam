@@ -1,11 +1,11 @@
 % MAT File with PSF data
-impulse_mat_file_name = './example_data/zstack_270_320_44_4github.mat';
+impulse_mat_file_name = './example_data/example_psfs.mat';
 
 % Variable name in mat file
 impulse_var_name = 'psf';
 
 % Measurement
-image_file = './example_data/usaf_tilt_4github.png';
+image_file = './example_data/example_raw.png';
 color_to_process = 'mono';  %'red','green','blue', or 'mono'. If raw file is mono, this is ignored
 image_bias = 100;   %If camera has bias, subtract from measurement file. 
 psf_bias = 102;   %if PSF needs sensor bias removed, put that here.
@@ -38,7 +38,7 @@ solverSettings.cmap = 'gray';
 
 
 %Figures and display
-solverSettings.disp_percentile = 100;   %Percentile of max to set image scaling
+solverSettings.disp_percentile = 99.9;   %Percentile of max to set image scaling
 solverSettings.save_every = 0;   %Save image stack as .mat every N iterations. Use 0 to never save (except for at the end);
 
 
@@ -48,8 +48,8 @@ solverSettings.save_dir = '../DiffuserCamResults/';
 solverSettings.disp_crop = @(x)gather(x(floor(size(x,1)/4):floor(size(x,1)*3/4),...
     floor(size(x,2)/4):floor(size(x,2)*3/4),:));
 solverSettings.disp_func = @(x)x;  %Function handle to modify image before display. No change to data, just for display purposes
-solverSettings.disp_figs = 1;   %If set to 0, never display. If set to N>=1, show every N.
-solverSettings.print_interval = 1;  %Print cost every N iterations. Default 1. If set to 0, don't print.
+solverSettings.disp_figs = 50;   %If set to 0, never display. If set to N>=1, show every N.
+solverSettings.print_interval = 50;  %Print cost every N iterations. Default 1. If set to 0, don't print.
 fig_num = 1;   %Figure number to display in
 save_results = 1;
 solverSettings.save_vars = {'vk'};  % List of variable names. If empty or not included in settings file, defaults to just vk, the main volume

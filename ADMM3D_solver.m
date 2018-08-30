@@ -123,7 +123,7 @@ end
 
 v_mult = 1./(mu1*HtH + mu2*PsiTPsi + mu3);  %Denominator of v update (in 3D frequency space)
 
-DtD = pad3d((abs(b)+1)./(abs(b)+1));   % Use input image to compute DtD so it picks up datatype of input (for Gpu)
+DtD = pad3d(ones(Ny, Nx, 'like', b)); % Initialize DtD with same datatype as input
 nu_mult = 1./(DtD + mu1);   %denominator of nu update
 
 n = 0;  %Initialize number of steps to 0
