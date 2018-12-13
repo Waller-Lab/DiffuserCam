@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-110853731-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-110853731-1');
+    </script>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>DiffuserCam</title>
+
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	<link href="styles/minimal.css" rel="stylesheet">
+    
+    <!-- <base target="_blank"> Makes links open in new tab/window-->
+</head>
+
+<body>
+<!-- Navigation bar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-nav"> 
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="nav-item"><a href="index.html">Home</a></li>
+                <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Build-your-own tutorial <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                          <li><a class="nav-item dropdown-item" href="quickstart.html">Quick Start Guide</a></li>
+                          <li><a class="nav-item dropdown-item" href="tutorial.html">Full Tutorial</a></li>
+                        </ul>
+                </li>
+                <li class="nav-item"><a href="gallery.html">Gallery</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Code <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                          <li><a class="nav-item dropdown-item" href="https://github.com/Waller-Lab/DiffuserCam">3D Algorithm Code</a></li>
+                          <li><a class="nav-item dropdown-item" href="https://github.com/Waller-Lab/DiffuserCam-Tutorial">2D Tutorial Code</a></li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav> 
+    
+<div class="container">
+<div class="row">
+    <h1><b>Build your own DiffuserCam: Tutorial</b></h1>
+	<p>One of the best things about DiffuserCam is that it is easy to build your own! We provide a guide on how to build your own lensless camera for 2D photography. We recommend using a Raspberry Pi camera with scotch tape as the diffuser. We will also walk you through the algorithms, step-by-step, in an iPython notebook.</p>
+    <p><b>This is a quick-start guide. For more detailed desciptions and links to all resources, check out the <a href="tutorial.html">full tutorial</b></a>.</p>
+	<img class="center" src="resources/rpi_cam.png" style="width:600px"> 
+	<br />
+    <strong>Questions or feedback?</strong> We'd also love to hear about any projects that you create using this tutorial! Feel free to contact the authors, Camille Biscarrat (camei *at* berkeley *dot* edu), Shreyas Parthasarathy (shreyas *dot* partha *at* berkeley *dot* edu), Grace Kuo (gkuo *at* berkeley *dot* edu), and Nick Antipa (nick *dot* antipa *at* berkeley *dot* edu).
+    <br />
+    </div>
+<div class="row">
+<div class="col-12">
+	<h1><b>Quick-Start Guide</b></h1>
+	<p>This is the quick-start guide to building a DiffuserCam out of tape. A more detailed building guide is provided <a href="tutorial/building_guide.pdf">here</a>.
+    <br />
+    We will build our DiffuserCam to look like this:</p>
+    <div align="center">
+    <figure class="fig:side">
+        <img src="tutorial/quick_start_figs/side_view.png" class="figure-img img-responsive">
+         <div class="caption">
+          <figcaption class="figure-caption">Fig 1: Side View of DiffuserCam</figcaption>
+        </div>
+    </figure>
+    </div>
+    <br />
+    <h2> Materials List</h2>
+    <div class="materials-list">
+    <ul>
+        <li><strong>A Raspberry Pi and PiCamera sensor:</strong> If you need help setting the Raspberry Pi up, see the <a href="#picamera">section on PiCamera software</a> at the bottom of this page.
+ </li>
+        <li><strong>Double sided tape (the diffuser)</strong></li>
+        <li><strong>Opaque separating material:</strong> Blocks stray light and keeps the tape at the right distance (black foamboard, cardboard, paper, etc.).</li>
+        <li><strong>Black tape:</strong> Necessary for creating the opaque aperture and blocking stray light where needed.</li>
+        <li><strong>Point source:</strong> We used a single LED placed behind a pinhole aperture.</li>
+        <li><strong>Computer equipped with Python 3:</strong> Our installation instructions assume you have the Anaconda distribution, but that is not strictly necessary to run the code.</li>
+        <li><strong>Darkness:</strong> For best results, take all the pictures and calibration measurements in as dark an environment as possible (take measurements in a dark room or cover the setup with a box, etc.). Although the room should be dark, the object should be bright and well illuminated.</li>
+        
+        </ul>
+    </div>
+    <br />
+    <div class="instructions">
+    <h2> Instructions: Building your Camera</h2>
+    <ol class="list-group-numbered">
+        <li class="list-group-item"> Remove the lens from your PiCamera.  Cut the glue between the mount and the sensor with a blade (Fig. 2b).  When cutting, be careful not to damage any of the electrical components on the edge of the sensor -- see Fig. 2c to determine where delicate components are, and start cutting on the side with fewer components.
+        <div>
+        <figure class="row">
+            <div>
+                <img src="tutorial/quick_start_figs/fig2_panel_2.png" class="img-responsive" style="margin:1em;max-width: 95%">
+            </div> 
+            <figcaption class="figure-caption">Fig 2: The Raspberry Pi Camera: (a) PiCamera with the lens, (b) Sideview of the camera, (c) Camera with the mount removed. The arrows indicate electrical compenents to avoid when cutting the glue.</figcaption>
+        </figure>
+        </div>
+        </li>
+        <li class="list-group-item"><p>Find the "focal distance" of the tape, the distance at which its PSF has the sharpest features (see Fig. 3 for an example). You should be able to find the distance at which there is a clear caustic pattern by shining a point source through the tape in a dark room and moving the tape closer or farther from the sensor by hand. The point source should be "at infinity" -- around 40 cm is enough for typical focal lengths. </p>
+
+        (You may need to <a href="#picamera">setup</a> your Raspberry Pi so you can see a preview of the camera output.)
+        <figure class="row" style="margin: 1em">
+            <div>
+                <img src="tutorial/quick_start_figs/focus.png" class="img-responsive" style="max-width: 95%;">
+                <figcaption class="figure-caption">Fig 3: Sensor reading of a point light source when (a) a diffuser is placed at the right distance, (b) a diffuser is too far from the sensor, (c) a diffuser is very far from the sensor.</figcaption>
+            </div> 
+        </figure>
+             Our double-sided tape had the sharpest caustic when placed around 3mm from the sensor:
+            <figure class="row" style="margin:1em">
+            <div>
+                <img src="tutorial/quick_start_figs/tape_20cm_psf.png" class="img-responsive text-center" style="max-width: 65%"> 
+                <figcaption class="figure-caption">Fig 4: Scotch double-sided tape caustic. Your PSF may look different, but the lines should still be sharp.</figcaption>
+            </div>
+            </figure>
+        </li>
+        <li class="list-group-item">Place the separating material around the sensor and place the tape on top of it so that it is taut and propped up at the right focal distance. Make sure the separating layer doesn't let in light through the sides. </li>
+        <li class="list-group-item">Use the black tape to create an aperture. Make sure the entire cropped PSF is within the sensor field of view by having your camera on while placing the aperture. <strong>Make sure the pattern occupies most of the field of view!</strong> See below for a comparison.
+        <figure class="row" style="margin: 1em">
+            <div>
+                <img src="tutorial/quick_start_figs/fig5.png" class="img-responsive" style="max-width: 95%;">
+                <figcaption class="figure-caption">Figure 5</figcaption>
+            </div> 
+        </figure>    
+        
+        </li>
+        <li class="list-group-item"> Take a calibration image (PSF) of a point source. The point source should be as small as possible and as bright as possible without saturating the sensor. We used an LED with a cardboard pinhole aperture in front of it. Adjust the brightness of your light or the exposure time on the camera so that the maximum value is less than 255. </li>
+        <li class="list-group-item">Take an image of your object. If you're using double-sided Scotch tape, the <a href="https://github.com/Waller-Lab/DiffuserCam-Tutorial/tree/master/test_images">test images</a> provided with our code should be placed around 20cm away when displayed on a typical phone screen. We recommemend using a simple, high contrast image to start, such as the spiral test image. Remember to take images in the dark!</li>
+        <li class="list-group-item">Run the reconstruction algorithm with your point spread function (PSF) and object images as inputs. Instructions for installing and running the code are below.</li>
+    </ol>
+    </div>
+
+
+    <br />
+    <div class="reconstructing-images">
+    <h2>Instructions: Reconstructing Images</h2>
+
+    <p>We'll reconstruct our images on a regular computer (not the Raspberry Pi), so you'll need to transfer your images to your computer. Follow the instructions below to install the correct files and process your data</p>
+    <p>(These instructions assume an Anaconda distribution because it allows for easy installation of dependencies. If you have your own Python3 development setup, feel free to use that instead. The packages you need to install are listed in the <tt>environment.yml</tt> file.)</p>
+
+    <ol class="list-group-numbered">
+        <li class="list-group-item">
+    <p>Install <a href="https://www.anaconda.com/download/#macos">Anaconda</a> if you do not already have it. Then, open the terminal on your computer and navigate to the directory in which you want to place all the DiffuserCam code. If using Mac of Linux, enter the following commands: </p>
+
+    <pre><code>git clone https://github.com/Waller-Lab/DiffuserCam-Tutorial.git
+cd DiffuserCam-Tutorial
+conda env create
+source activate diffuser_cam</code></pre>
+
+  If using windows, use the same commands as above, but replace <tt>"source activate diffuser_cam"</tt> with <tt>"activate diffuser_cam"</tt>.</li>
+   <li class="list-group-item">
+    Next, open up the gradient descent configuration file <tt>gd_config.yml</tt> and modify the file pathes to point to your PSF measurement and raw data. (See the FISTA IPython notebook for explanations of the other parameters).</li>
+   <li class="list-group-item">
+    Finally, in your terminal, run <tt>python gd.py</tt> to reconstruct the images you selected in the config file. If you restart your terminal, you will have to re-activate the diffuser_cam environment before you can run our python files. </li>
+</ol>
+
+    <p id="picamera"> <strong>Note: </strong>Our code assumes images are black-and-white (1 channel, not 3 as in the typical RGB image). The down/upsampling also assumes that the image dimensions are even numbers. If you use our image capture code, both of these requirements should be automatically satisfied.</p>
+
+    </div>
+    
+    <br />
+    <div class="picamera-setup">
+    <h2>Instructions: Setting up PiCamera Software</h2>
+    <p>These instructions are for setting up your Raspberry Pi and PiCamera in a convenient way for taking pictures and transferring the images to your computer for processing. If you already have a setup that works, feel free to ignore this section.</p>
+    
+    <ol class="list-group-numbered">
+        <li class="list-group-item"><a href="https://www.raspberrypi.org/learning/software-guide/">Set up</a> the Raspberry Pi operating system (NOOBS is easiest)</li>
+        <li class="list-group-item">Connect the Raspberry Pi to WiFi:
+                    <ul style="padding-left:15px;"><li><a href="https://www.raspberrypi.org/learning/software-guide/wifi/">A general guide</a></li> <li>If you need to connect to a network that requires both a login and password, follow the corresponding section in <a href="https://github.com/bwasmith/Rhew-R-Pi/wiki/Setting-up-Raspberry-Pi">these</a> instructions.</li></ul>
+                </li></li>
+        <a href="#item2" class="list-group-item" data-toggle="collapse">If you don't mind always having the raspberry pi and camera connected to an external monitor and keyboard, skip to step 3. Otherwise, <strong>click here</strong> to see instructions for setting up VNC.
+        </a>
+
+            <ol id=item2 class="list-group-alpha collapse">
+                <li class="list-group-item" style="padding-left: 30px;border-top:0">Set up VNC on your laptop and the Raspberry Pi:
+                    <ul style="padding-left:15px;">
+                        <li><a href="https://www.realvnc.com/en/connect/docs/raspberry-pi.html#setting-up-your-raspberry-pi">Enable</a> VNC Server on your Pi (or download it if your Pi OS isn't standard)</li>
+                        <li><a href="https://www.realvnc.com/en/connect/docs/raspberry-pi.html#raspberry-pi-connect-cloud">Set up</a> the VNC viewer on your laptop and connect.</li><li>When you connect to the pi via VNC Viewer, if the display doesn't fill the entire screen you should go to <strong>Preferences &#8594 Raspberry Pi Configuration &#8594 Set Resolution</strong> and set it to a resolution that allows it to fill the VNC Viewer window. Otherwise, when you use our preview code, the terminal might get obscured by the preview.</li></ul>
+                </li>
+                <li class="list-group-item" style="padding-left: 30px;border-top: 0;border-bottom:0">On the raspberry Pi VNC Server, go to <strong>Options &#8594 Troubleshooting &#8594 </strong> Check the <strong>Enable experimental direct capture mode</strong> box. This lets the picamera preview display correctly on the VNC Viewer.</li>
+            </ol> 
+        <li class="list-group-item">
+        Install <tt>numpy</tt>, <tt>pillow</tt>, and <tt>picamera</tt>. The raspberry pi is very slow to assemble numpy if you use <tt>pip</tt>, so we recommend the following (note we're installing the <tt>python3</tt> version because all our code is Python 3). To do this, open the <a href="https://www.raspberrypi.org/documentation/usage/terminal/">terminal</a> and run:</br></br>
+
+            <pre><code>sudo apt-get install python3-picamera <font color="green">#also installs python3-numpy </font>
+sudo apt-get install python3-pillow</code></pre>
+
+        </li>
+        <li class="list-group-item">
+        Download the files in our <a href="https://github.com/Waller-Lab/DiffuserCam-Tutorial">Github repository</a>. Copy the <tt>preview.py</tt> file, located inside the <tt>rpi</tt> folder, to your Pi.
+         <ul style="padding-left: 30px;list-style-type: square"><li>If you set up VNC, then you can use the <strong>Transfer Files</strong> option in the VNC menu at the top of your window, or you can tranfer with a USB flash drive.</li></ul>
+        </li>
+        <li class="list-group-item">Connect the picamera to the appropriate slot in the Pi (it should be labeled "CAMERA") and restart your terminal.</li>
+        <li class="list-group-item">To preview the camera output and capture images, run <tt>python3 preview.py</tt> in the terminal. Follow the prompts in the terminal to change shutter speed, take the image, and name the image file. 
+        <ul style="padding-left: 30px;list-style-type: square"><li>With VNC, you can transfer the image back to your computer using the same file transfer option.</li></ul>
+        </li>
+        
+        </ol>
+    </div>
+    </div>
+    </div>
+</div>
+
+    <nav class="navbar navbar-default">
+	</nav> 
+</body>
+</html>
+        

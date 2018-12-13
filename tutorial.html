@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-110853731-1"></script>
+	<script>
+  		window.dataLayer = window.dataLayer || [];
+  		function gtag(){dataLayer.push(arguments);}
+  		gtag('js', new Date());
+  		gtag('config', 'UA-110853731-1');
+	</script>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>DiffuserCam</title>
+
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	<link href="styles/minimal.css" rel="stylesheet">
+</head>
+
+<body>
+<!-- Navigation bar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container-nav">	
+		<div class="container-fluid">
+    		<ul class="nav navbar-nav">
+      			<li class="nav-item"><a href="index.html">Home</a></li>
+      			<li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Build-your-own tutorial <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                          <li><a class="nav-item dropdown-item" href="quickstart.html">Quick Start Guide</a></li>
+                          <li><a class="nav-item dropdown-item" href="tutorial.html">Full Tutorial</a></li>
+                        </ul>
+                </li>
+      			<li class="nav-item"><a href="gallery.html">Gallery</a></li>
+      			<li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Code <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                          <li><a class="nav-item dropdown-item" href="https://github.com/Waller-Lab/DiffuserCam">3D Algorithm Code</a></li>
+                          <li><a class="nav-item dropdown-item" href="https://github.com/Waller-Lab/DiffuserCam-Tutorial">2D Tutorial Code</a></li>
+                        </ul>
+                </li>
+    		</ul>
+      	</div>
+    </div>
+</nav> 
+
+	
+<div class="container">
+
+	<h1><b>Build your own DiffuserCam: Tutorial</b></h1>
+	<p>One of the best things about DiffuserCam is that it is easy to build your own! We provide a guide on how to build your own lensless camera for 2D photography. We recommend using a Raspberry Pi camera with scotch tape as the diffuser. We will also walk you through the algorithms, step-by-step, in an iPython notebook.</p>
+	<p><b>Want a short overview of all of the steps? Check out our <a href="quickstart.html">quick-start guide</b></a>. See below for more detailed instructions and links to all resources.</p>
+	<img class="center" src="resources/rpi_cam.png" style="width:600px"> 
+	<br />
+    
+    <strong>Questions or feedback?</strong> We'd also love to hear about any projects that you create using this tutorial! Feel free to contact the authors, Camille Biscarrat (camei *at* berkeley *dot* edu), Shreyas Parthasarathy (shreyas *dot* partha *at* berkeley *dot* edu), Grace Kuo (gkuo *at* berkeley *dot* edu), and Nick Antipa (nick *dot* antipa *at* berkeley *dot* edu).
+    <br />
+    <br />
+
+
+
+	<div class="row">
+	<h1><b>Instructions</b></h1>
+	<p>
+	Start by reading our <a href="tutorial/building_guide.pdf">guide to building your camera</a> (below). Look at the other resources for more details on the modeling and algorithms.</p>
+        
+	<p><b><a href="tutorial/building_guide.pdf">Guide to building your camera (pdf)</a></b> 
+	<br />
+	Instructions on taking apart a Raspberry Pi camera, capturing raw data, and processing data with our provided python code.</p>
+
+	<p><b><a href="tutorial/algorithm_guide.pdf">Guide to modeling and algorithms (pdf)</a></b> 
+	<br />
+	Explanation of how we mathematically model image formation in our camera and then use that model to recover pictures from the raw data.</p>
+
+    <p><b><a href="tutorial/GD.html">iPython Notebook: FISTA Algorithm</a> (<a href="tutorial/GD.html">html</a>) (<a href="tutorial/GD.ipynb">.ipy</a>)</b>
+	<br />
+	A step-by-step walk though of how images can be recovered from the DiffuserCam raw data using the FISTA algorithm. We recommend that you explore this algorithm first. (Sample data is available in the <a href="https://github.com/Waller-Lab/DiffuserCam-Tutorial">Github respository</a>)</p>
+
+    <p><b><a href="tutorial/ADMM.html"> iPython Notebook: ADMM Algorithm</a> (<a href="tutorial/ADMM.html">html</a>) (<a href="tutorial/ADMM.ipynb">.ipy</a>)</b>
+	<br />
+	A step-by-step walk though of how images can be recovered from the DiffuserCam raw data using the ADMM algorithm. We recommend that you explore the FISTA algorithm (above) first since it's more intuitive. However, in this walk through, you'll see that ADMM can be much more efficient. (Sample data is available in the <a href="https://github.com/Waller-Lab/DiffuserCam-Tutorial">Github respository</a>)</p>
+
+	 <p><b><a href="https://github.com/Waller-Lab/DiffuserCam-Tutorial"> Github Repository</a></b>
+	<br />
+	Python code for capturing images on the Raspberry Pi and then processing the data to recover pictures. Includes iPython notebooks and sample data.</br>
+	<strong>Note: </strong>Our code assumes images are black-and-white (1 channel, not 3 as in the typical RGB image). The down/upsampling also assumes that the image dimensions are even numbers. If you use our image capture code, both of these requirements should be automatically satisfied.</p>
+
+	<p><b><a href="tutorial/appendix.pdf">Appendix (pdf)</a></b>
+	<br />
+	Step-by-step derivations and proofs that fill in the gaps for those who are looking for a deeper understanding of the theory used in the DiffuserCam project.</p>
+	</div>
+
+
+
+
+		
+
+
+</div>
+	<nav class="navbar navbar-default">
+	</nav> 
+</body>
+</html>
